@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { setFavicon } from "./favicon";
 
 const flows = [
   { who: "Abdulaziz", site: "Saudi Post (SPL)", title: "حاسبة الأسعار البريدية", to: "/spl/calculator", ready: true },
@@ -8,6 +10,7 @@ const flows = [
 ];
 
 export default function Home() {
+  useEffect(() => { document.title = "SWE482 Prototypes"; setFavicon("/favicons/hub.svg"); }, []);
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-10">
       <div className="w-full max-w-3xl">

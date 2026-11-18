@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { BellRing, Heart, Settings, LogOut, Store, CircleCheck } from "lucide-react";
 import { useAlerts, notesOf, markSeen, markAllSeen, useToast, type Note } from "./alerts";
 import { critQuery } from "./search";
+import { setFavicon } from "../favicon";
 import { fmt, timeAgo } from "./data";
 import { Img } from "./asset";
 import "./haraj.css";
@@ -193,7 +194,7 @@ function Footer() {
 }
 
 export function HarajLayout({ children, title, activeBrand, showNav = true }: { children: ReactNode; title: string; activeBrand?: string; showNav?: boolean }) {
-  useEffect(() => { document.title = `${title} | موقع حراج`; }, [title]);
+  useEffect(() => { document.title = `${title} | موقع حراج`; setFavicon("/favicons/haraj.svg"); }, [title]);
   return (
     <div className="dark hj-root min-h-screen" dir="rtl">
       <Header />

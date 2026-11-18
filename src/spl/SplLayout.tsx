@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Menu, MapPin, Search, ChevronLeft, Home } from "lucide-react";
+import { setFavicon } from "../favicon";
 
 export function SplLayout({ children, crumbs, section = "individuals", title }: {
   children: ReactNode;
@@ -9,6 +10,7 @@ export function SplLayout({ children, crumbs, section = "individuals", title }: 
   title?: string;
 }) {
   useEffect(() => {
+    setFavicon("/favicons/spl.png");
     document.title = `${title ?? crumbs[crumbs.length - 1]?.label ?? "سبل"} | البريد السعودي | سبل`;
   }, [title, crumbs]);
   const tab = (on: boolean) => `px-4 flex items-center ${on ? "bg-white/10 font-semibold text-white" : "text-white/70 hover:text-white"}`;
