@@ -16,5 +16,6 @@ npm run dev
 ```
 
 ## Deploy
-**Vercel:** push this folder to a GitHub repo → vercel.com → Add New Project → import the repo → Deploy (Vite is detected automatically). `vercel.json` already handles page refreshes on sub-pages.
+**Vercel (recommended):** push this folder to a GitHub repo → vercel.com → Add New Project → import the repo → Deploy (Vite is detected automatically). `vercel.json` already handles page refreshes on sub-pages.
 
+**Netlify (no Git):** run `npm run build`, then drag the `dist` folder onto app.netlify.com/drop. (`public/_redirects` handles sub-page refreshes.)
