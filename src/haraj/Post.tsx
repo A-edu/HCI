@@ -10,7 +10,7 @@ const PREVIEW_IMG: Record<string, string> = {
   "يارس": W + "8/85/2017_Toyota_Yaris_L_5-door%2C_front_right%2C_08-25-2024.jpg/330px-2017_Toyota_Yaris_L_5-door%2C_front_right%2C_08-25-2024.jpg",
   "كامري": W + "4/4d/Toyota_Camry_AXVH80_2.5_HEV_Platinum_White_Pearl_Mica_05.jpg/330px-Toyota_Camry_AXVH80_2.5_HEV_Platinum_White_Pearl_Mica_05.jpg",
   "كورولا": W + "f/f1/2018_Toyota_Corolla_%28MZEA12R%29_Ascent_Sport_hatchback_%282018-11-02%29_01.jpg/330px-2018_Toyota_Corolla_%28MZEA12R%29_Ascent_Sport_hatchback_%282018-11-02%29_01.jpg",
-  "هايلكس": W + "1/1b/2016_Toyota_HiLux_Invincible_D-4D_4WD_2.4_Front.jpg/330px-2016_Toyota_HiLux_Invincible_D-4D_4WD_2.4_Front.jpg",
+  "هايلكس": W + "7/74/Toyota_Hilux_2.4_E_4x2_2014.jpg/330px-Toyota_Hilux_2.4_E_4x2_2014.jpg",
   "لاندكروزر": W + "6/6d/2021_Toyota_Land_Cruiser_300_3.4_ZX_%28Colombia%29_front_view_04.png/330px-2021_Toyota_Land_Cruiser_300_3.4_ZX_%28Colombia%29_front_view_04.png",
 };
 const YEARS = Array.from({ length: 2026 - 1980 + 1 }, (_, i) => 2026 - i);
@@ -38,14 +38,14 @@ export default function Post() {
 
   // car fields
   const [brand, setBrand] = useState("تويوتا");
-  const [model, setModel] = useState("يارس");
+  const [model, setModel] = useState("هايلكس");
   const [year, setYear] = useState(2014);
   const [kmRaw, setKmRaw] = useState("");
   const [isNew, setIsNew] = useState(false);
   const [confirmKm, setConfirmKm] = useState(false);
-  const [trans, setTrans] = useState<Trans>("أوتوماتيك");
+  const [trans, setTrans] = useState<Trans>("عادي");
   const [fuel, setFuel] = useState<Fuel>("بنزين");
-  const [city, setCity] = useState("مكة");
+  const [city, setCity] = useState("بيشة");
   const [price, setPrice] = useState("");
   const [auction, setAuction] = useState(false);
   const [desc, setDesc] = useState("");
@@ -164,7 +164,7 @@ export default function Post() {
                         <div>
                           <label className={lbl}>السعر</label>
                           <div className={`flex items-center h-11 rounded-lg bg-background border border-secondary-input-gray px-3 gap-2 ${auction ? "opacity-50" : ""}`}>
-                            <input disabled={auction} value={price} onChange={(e) => setPrice(e.target.value.replace(/\D/g, ""))} dir="ltr" className="flex-1 min-w-0 bg-transparent outline-none text-right" placeholder="18500" />
+                            <input disabled={auction} value={price} onChange={(e) => setPrice(e.target.value.replace(/\D/g, ""))} dir="ltr" className="flex-1 min-w-0 bg-transparent outline-none text-right" placeholder="35000" />
                             <span className="text-secondary/60 text-[13px]">ريال</span>
                           </div>
                           <label className="mt-2 flex items-center gap-2 text-[13px] cursor-pointer w-fit"><input type="checkbox" checked={auction} onChange={() => setAuction(!auction)} className="accent-[#46a6f0]" /> على السوم</label>
