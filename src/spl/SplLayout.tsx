@@ -1,17 +1,26 @@
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Menu, MapPin, Search, ChevronLeft, Home } from "lucide-react";
 
-export function SplLayout({ children, crumbs }: { children: ReactNode; crumbs: { label: string; to?: string }[] }) {
+export function SplLayout({ children, crumbs, section = "individuals", title }: {
+  children: ReactNode;
+  crumbs: { label: string; to?: string }[];
+  section?: "individuals" | "business";
+  title?: string;
+}) {
+  useEffect(() => {
+    document.title = `${title ?? crumbs[crumbs.length - 1]?.label ?? "سبل"} | البريد السعودي | سبل`;
+  }, [title, crumbs]);
+  const tab = (on: boolean) => `px-4 flex items-center ${on ? "bg-white/10 font-semibold text-white" : "text-white/70 hover:text-white"}`;
   return (
     <div className="min-h-screen flex flex-col bg-white">
       {/* utility bar */}
       <div className="bg-spl-ink text-white text-[13px]">
         <div className="max-w-6xl mx-auto px-6 h-9 flex items-center justify-between">
           <div className="flex h-full">
-            <span className="px-4 flex items-center bg-white/10 font-semibold">الأفراد</span>
-            <span className="px-4 flex items-center text-white/70">الأعمال</span>
-            <span className="px-4 flex items-center text-white/70">الخدمات الحكومية</span>
+            <Link to="/spl/calculator" className={tab(section === "individuals")}>الأفراد</Link>
+            <Link to="/spl/business" className={tab(section === "business")}>الأعمال</Link>
+            <span className={tab(false)}>الخدمات الحكومية</span>
           </div>
           <div className="flex items-center gap-5 text-white/85">
             <span>مساعدة</span>
@@ -27,7 +36,7 @@ export function SplLayout({ children, crumbs }: { children: ReactNode; crumbs: {
         <div className="max-w-6xl mx-auto px-6 h-[72px] flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Menu className="text-spl-deep" size={26} />
-            <Link to="/spl/calculator" aria-label="سبل - البريد السعودي">
+            <Link to={section === "business" ? "/spl/business" : "/spl/calculator"} aria-label="سبل - البريد السعودي">
               <img src="/spl-logo.png" alt="سبل" className="h-11 w-auto" />
             </Link>
           </div>
@@ -63,7 +72,7 @@ export function SplLayout({ children, crumbs }: { children: ReactNode; crumbs: {
           </div>
           <div>
             <div className="text-white font-semibold mb-3">الأعمال</div>
-            <div className="space-y-2"><div>منصة SMEs</div><div>التجارة الإلكترونية</div><div>الغرف البريدية</div></div>
+            <div className="space-y-2"><Link to="/spl/business/ship" className="block hover:text-white">الشحن للمنشآت</Link><div>التجارة الإلكترونية</div><div>الغرف البريدية</div></div>
           </div>
           <div>
             <div className="text-white font-semibold mb-3">تواصل معنا</div>

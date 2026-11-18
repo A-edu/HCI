@@ -309,7 +309,7 @@ export default function Calculator() {
 
           {/* bundles tip */}
           {valid && dest === "domestic" && type === "parcel" && (
-            <Link to="/spl/business" className="mt-6 flex items-center justify-between bg-spl-skysoft border border-spl-sky/40 px-6 py-4 group">
+            <Link to="/spl/business/ship" className="mt-6 flex items-center justify-between bg-spl-skysoft border border-spl-sky/40 px-6 py-4 group">
               <div className="flex items-center gap-4">
                 <Boxes className="text-spl-teal" size={28} />
                 <div>
