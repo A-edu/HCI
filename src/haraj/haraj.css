@@ -1,0 +1,36 @@
+@font-face { font-family: "Thmanyah Sans"; src: url("/fonts/thmanyah/thmanyah-sans-Regular.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Thmanyah Sans"; src: url("/fonts/thmanyah/thmanyah-sans-Medium.woff2") format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Thmanyah Sans"; src: url("/fonts/thmanyah/thmanyah-sans-Bold.woff2") format("woff2"); font-weight: 600 900; font-display: swap; }
+
+/* Haraj dark theme tokens (values read from haraj.com.sa) */
+.hj-root {
+  --background: 30 29 44;
+  --background-card: 37 37 52;
+  --background-darker: 21 20 38;
+  --primary: 16 115 192;
+  --primary-darker: 0 97 173;
+  --secondary: 133 173 214;
+  --secondary-darker: 109 152 196;
+  --secondary-lighter: 235 241 248;
+  --secondary-input-gray: 59 73 105;
+  --secondary-input-blue: 178 188 211;
+  --action: 254 202 129;
+  --action-darker: 253 182 81;
+  --elementary: 133 173 214;
+  --danger: 239 0 0;
+  --avatar-bg: 55 65 81;
+  --text-title: 31 185 132;
+  --text-regular: 204 204 204;
+  --text-primary: 70 166 240;
+  --text-on-primary: 185 218 241;
+  --text-on-action: 30 29 44;
+  --text-tertiary: 160 165 180;
+  font-family: "Thmanyah Sans", -apple-system, system-ui, "Segoe UI", sans-serif;
+  font-weight: 500;
+  color: rgb(var(--text-regular));
+  background: rgb(var(--background-card));
+  color-scheme: dark;
+}
+.hj-root .tab-scroll { scrollbar-width: none; }
+.hj-root .tab-scroll::-webkit-scrollbar { display: none; }
+.hj-root .custom-scroll { scrollbar-width: thin; scrollbar-color: rgb(var(--secondary-input-gray)) transparent; }
