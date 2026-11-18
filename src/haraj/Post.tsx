@@ -10,7 +10,7 @@ const PREVIEW_IMG: Record<string, string> = {
   "يارس": W + "8/85/2017_Toyota_Yaris_L_5-door%2C_front_right%2C_08-25-2024.jpg/330px-2017_Toyota_Yaris_L_5-door%2C_front_right%2C_08-25-2024.jpg",
   "كامري": W + "4/4d/Toyota_Camry_AXVH80_2.5_HEV_Platinum_White_Pearl_Mica_05.jpg/330px-Toyota_Camry_AXVH80_2.5_HEV_Platinum_White_Pearl_Mica_05.jpg",
   "كورولا": W + "f/f1/2018_Toyota_Corolla_%28MZEA12R%29_Ascent_Sport_hatchback_%282018-11-02%29_01.jpg/330px-2018_Toyota_Corolla_%28MZEA12R%29_Ascent_Sport_hatchback_%282018-11-02%29_01.jpg",
-  "هايلكس": W + "7/74/Toyota_Hilux_2.4_E_4x2_2014.jpg/330px-Toyota_Hilux_2.4_E_4x2_2014.jpg",
+  "هايلوكس": W + "7/74/Toyota_Hilux_2.4_E_4x2_2014.jpg/330px-Toyota_Hilux_2.4_E_4x2_2014.jpg",
   "لاندكروزر": W + "6/6d/2021_Toyota_Land_Cruiser_300_3.4_ZX_%28Colombia%29_front_view_04.png/330px-2021_Toyota_Land_Cruiser_300_3.4_ZX_%28Colombia%29_front_view_04.png",
 };
 const YEARS = Array.from({ length: 2026 - 1980 + 1 }, (_, i) => 2026 - i);
@@ -38,7 +38,7 @@ export default function Post() {
 
   // car fields
   const [brand, setBrand] = useState("تويوتا");
-  const [model, setModel] = useState("هايلكس");
+  const [model, setModel] = useState("هايلوكس");
   const [year, setYear] = useState(2014);
   const [kmRaw, setKmRaw] = useState("");
   const [isNew, setIsNew] = useState(false);
@@ -69,7 +69,7 @@ export default function Post() {
   const carReady = kmOk;
 
   const preview: Car = {
-    id: "new", kind: "car", brand, model, title, year, km: km ?? null, trans, fuel, color: "#b9bcc2", colorName: "", body: ["لاندكروزر", "برادو", "فورتشنر", "رايز", "اوربان كروزر", "سيكويا", "توسان", "باترول"].includes(model) ? "suv" : model === "هايلكس" ? "pickup" : "sedan",
+    id: "new", kind: "car", brand, model, title, year, km: km ?? null, trans, fuel, body: ["لاندكروزر", "برادو", "فورتشنر", "رايز", "اوربان كروزر", "سيكويا", "توسان", "باترول"].includes(model) ? "suv" : ["هايلوكس", "شاص"].includes(model) ? "pickup" : "sedan",
     city, price: auction || !price ? null : Number(price), ago: 0, seller: "fahad.s", desc,
   };
 

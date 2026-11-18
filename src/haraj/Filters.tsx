@@ -2,6 +2,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { MapPin, Navigation, CalendarDays, Gauge, Fuel, SlidersHorizontal, Video, Search, MessagesSquare, Map as MapIcon, X, ChevronDown, ChevronLeft, PackageOpen, Info, ArrowUpDown, Check } from "lucide-react";
 import { HarajLayout, Photo, chipOn } from "./HarajLayout";
+import { Img } from "./asset";
 import { IcPin, IcClock, IcRiyal, Avatar } from "./icons";
 import { LISTINGS, CITIES, fmt, timeAgo, cars as carsLabel, type Car, type Part } from "./data";
 
@@ -61,8 +62,8 @@ export function SpecTags({ c }: { c: Car }) {
       {c.km === null
         ? <span className="inline-flex h-6 items-center gap-1 rounded-md border border-[rgb(var(--action))]/30 bg-[rgb(var(--action))]/[0.08] px-2 text-[13px] text-[rgb(var(--action))]"><Gauge size={13} />الممشى غير مذكور</span>
         : <span className={t}><Gauge size={13} />{c.km === 0 ? "جديدة" : `${fmt(c.km)} كم`}</span>}
-      <span className={t}>{c.trans}</span>
-      <span className={t}><Fuel size={13} />{c.fuel}</span>
+      {c.trans && <span className={t}>{c.trans}</span>}
+      {c.fuel && <span className={t}><Fuel size={13} />{c.fuel}</span>}
     </div>
   );
 }
@@ -114,7 +115,7 @@ export function Sidebar() {
             <div className="grid grid-cols-3 gap-2">
               {SIDE_LOGOS.map((l) => (
                 <span key={l} className="flex w-full items-center justify-center border p-2 rounded text-[#aaa] h-[78px] border-secondary-input-gray hover:border-secondary">
-                  <img src={`https://v8-cdn.haraj.com.sa/assets/images/svg/${l}.svg`} alt="" width={60} height={60} className="max-h-[52px] w-auto" />
+                  <Img src={`https://v8-cdn.haraj.com.sa/assets/images/svg/${l}.svg`} alt="" width={60} height={60} className="max-h-[52px] w-auto" />
                 </span>
               ))}
             </div>

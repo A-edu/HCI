@@ -1,6 +1,7 @@
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ArrowRight, Bell, Phone, Handshake, Mail, Heart, Share2, Flag } from "lucide-react";
 import { HarajLayout, Photo } from "./HarajLayout";
+import { Img } from "./asset";
 import { IcPin, IcClock, IcRiyal, Avatar } from "./icons";
 import { LISTINGS, fmt, timeAgo, type Car } from "./data";
 
@@ -15,8 +16,8 @@ export default function Listing() {
   const rows: [string, string][] = [
     ["الماركة", c.brand], ["الطراز", c.model], ["الموديل", String(c.year)],
     ["الممشى", c.km === null ? "غير مذكور" : c.km === 0 ? "جديدة" : `${fmt(c.km)} كم`],
-    ["القير", c.trans], ["الوقود", c.fuel], ["اللون", c.colorName], ["المدينة", c.city],
-  ];
+    ["القير", c.trans ?? ""], ["الوقود", c.fuel ?? ""], ["اللون", c.colorName ?? ""], ["المدينة", c.city],
+  ].filter(([, v]) => v) as [string, string][];
 
   return (
     <HarajLayout title={c.title} showNav={false}>
@@ -64,7 +65,9 @@ export default function Listing() {
 
             <p className="px-1 text-[20px] leading-[1.9] text-white/90 whitespace-pre-line">{c.desc}</p>
 
-            <Photo src={c.img} alt={c.title} className="w-full max-h-[520px] rounded-lg" />
+            {(c.imgs ?? [c.img]).map((src, i) => (
+              (src ? <Img key={i} src={src} alt={`${c.title} – صورة ${i + 1}`} loading="lazy" className="w-full max-h-[760px] object-contain rounded-lg bg-background-darker" /> : null)
+            ))}
 
             <div className="flex gap-3 pt-2">
               <button className="h-11 px-6 rounded-[10px] border border-secondary-input-gray text-secondary flex items-center gap-2"><Handshake size={17} /> ارسل سومتك</button>

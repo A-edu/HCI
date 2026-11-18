@@ -6,20 +6,20 @@ export interface Car {
   kind: "car";
   brand: string;
   model: string;
-  title: string;
-  year: number;
-  km: number | null; // null = seller did not give a mileage
-  trans: Trans;
-  fuel: Fuel;
-  color: string; // paint colour for the illustration
-  colorName: string;
+  title: string; // the seller's title, word for word
+  year: number; // Haraj's structured "الموديل" field
+  km: number | null; // Haraj's structured "الممشى" field; 0 = new
+  trans: Trans | null; // null = seller left it out
+  fuel: Fuel | null;
+  colorName?: string;
   body: "sedan" | "suv" | "pickup";
   city: string;
   price: number | null; // null = على السوم
-  ago: number; // minutes since posted
+  ago: number; // minutes since posted (as captured 18 Nov 2026)
   seller: string;
-  desc: string;
-  img?: string;
+  desc: string; // the seller's text, word for word (phone numbers removed)
+  img?: string; // first photo (list thumbnail)
+  imgs?: string[]; // all photos, shown on the listing page
 }
 
 export interface Part {
@@ -36,47 +36,364 @@ export interface Part {
 
 export type Listing = Car | Part;
 
-const IMG: Record<string, string> = {"11192915021": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5a/Toyota_Land_Cruiser_79_Simple_cabine_GRJ_facelift_2024_version_Afrique.jpg/330px-Toyota_Land_Cruiser_79_Simple_cabine_GRJ_facelift_2024_version_Afrique.jpg", "11192915060": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2f/Toyota_Fortuner_4x2_V_2024.jpg/330px-Toyota_Fortuner_4x2_V_2024.jpg", "11192915388": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/74/Toyota_Hilux_2.4_E_4x2_2014.jpg/330px-Toyota_Hilux_2.4_E_4x2_2014.jpg", "11192911066": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4d/Toyota_Camry_AXVH80_2.5_HEV_Platinum_White_Pearl_Mica_05.jpg/330px-Toyota_Camry_AXVH80_2.5_HEV_Platinum_White_Pearl_Mica_05.jpg", "11192913620": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4d/Toyota_Camry_AXVH80_2.5_HEV_Platinum_White_Pearl_Mica_05.jpg/330px-Toyota_Camry_AXVH80_2.5_HEV_Platinum_White_Pearl_Mica_05.jpg", "11192910085": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f1/2018_Toyota_Corolla_%28MZEA12R%29_Ascent_Sport_hatchback_%282018-11-02%29_01.jpg/330px-2018_Toyota_Corolla_%28MZEA12R%29_Ascent_Sport_hatchback_%282018-11-02%29_01.jpg", "11192914830": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/da/2021_Daihatsu_Rocky_1.0_TC_R_ADS_Package_%28Indonesia%29_front_view_02.jpg/330px-2021_Daihatsu_Rocky_1.0_TC_R_ADS_Package_%28Indonesia%29_front_view_02.jpg", "11192912201": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/66/2015_Toyota_Fortuner_%28New_Zealand%29.jpg/330px-2015_Toyota_Fortuner_%28New_Zealand%29.jpg", "11192914102": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1b/2016_Toyota_HiLux_Invincible_D-4D_4WD_2.4_Front.jpg/330px-2016_Toyota_HiLux_Invincible_D-4D_4WD_2.4_Front.jpg", "11192914415": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6d/2021_Toyota_Land_Cruiser_300_3.4_ZX_%28Colombia%29_front_view_04.png/330px-2021_Toyota_Land_Cruiser_300_3.4_ZX_%28Colombia%29_front_view_04.png", "11192914990": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4d/Toyota_Camry_AXVH80_2.5_HEV_Platinum_White_Pearl_Mica_05.jpg/330px-Toyota_Camry_AXVH80_2.5_HEV_Platinum_White_Pearl_Mica_05.jpg", "11192911890": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6d/2021_Toyota_Land_Cruiser_300_3.4_ZX_%28Colombia%29_front_view_04.png/330px-2021_Toyota_Land_Cruiser_300_3.4_ZX_%28Colombia%29_front_view_04.png", "11192912311": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5b/Toyota_Urban_Cruiser.jpg/330px-Toyota_Urban_Cruiser.jpg", "11192910311": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ac/2018_Toyota_Camry_%28ASV70R%29_Ascent_sedan_%282018-08-27%29_01.jpg/330px-2018_Toyota_Camry_%28ASV70R%29_Ascent_sedan_%282018-08-27%29_01.jpg", "11192910712": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e8/2024_Toyota_Land_Cruiser_250_VX_in_Platinum_White_Pearl_Mica%2C_front_left.jpg/330px-2024_Toyota_Land_Cruiser_250_VX_in_Platinum_White_Pearl_Mica%2C_front_left.jpg", "11192909877": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f1/2018_Toyota_Corolla_%28MZEA12R%29_Ascent_Sport_hatchback_%282018-11-02%29_01.jpg/330px-2018_Toyota_Corolla_%28MZEA12R%29_Ascent_Sport_hatchback_%282018-11-02%29_01.jpg", "11192914670": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/2017_Toyota_Yaris_L_5-door%2C_front_right%2C_08-25-2024.jpg/330px-2017_Toyota_Yaris_L_5-door%2C_front_right%2C_08-25-2024.jpg", "11192914407": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1b/2016_Toyota_HiLux_Invincible_D-4D_4WD_2.4_Front.jpg/330px-2016_Toyota_HiLux_Invincible_D-4D_4WD_2.4_Front.jpg", "11192908112": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cf/2023_Toyota_Sequoia_Limited_in_Wind_Chill_Pearl%2C_Front_Right%2C_01-16-2023.jpg/330px-2023_Toyota_Sequoia_Limited_in_Wind_Chill_Pearl%2C_Front_Right%2C_01-16-2023.jpg", "11192907766": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8c/2019_Toyota_Avalon_XSE_in_Ruby_Flare_Pearl%2C_Front_Right%2C_09-05-2022.jpg/330px-2019_Toyota_Avalon_XSE_in_Ruby_Flare_Pearl%2C_Front_Right%2C_09-05-2022.jpg"};
-const car = (c: Omit<Car, "kind" | "brand">): Car => ({ kind: "car", brand: "تويوتا", img: IMG[c.id], ...c });
+// Real Haraj listings (haraj.com.sa, captured 18 Nov 2026). Titles, sellers, cities,
+// prices and descriptions are copied word for word; the specs are Haraj's own
+// structured fields from each ad. The 14 model-2025 ads use their own photos (public/assets/listings/); the others use a stand-in photo of the model.
+const W = "https://thumb.wikimedia.org/wikipedia/commons/thumb/";
+const PHOTO: Record<string, string> = {
+  "كامري": W + "4/4d/Toyota_Camry_AXVH80_2.5_HEV_Platinum_White_Pearl_Mica_05.jpg/330px-Toyota_Camry_AXVH80_2.5_HEV_Platinum_White_Pearl_Mica_05.jpg",
+  "كورولا": W + "f/f1/2018_Toyota_Corolla_%28MZEA12R%29_Ascent_Sport_hatchback_%282018-11-02%29_01.jpg/330px-2018_Toyota_Corolla_%28MZEA12R%29_Ascent_Sport_hatchback_%282018-11-02%29_01.jpg",
+  "لاندكروزر": W + "6/6d/2021_Toyota_Land_Cruiser_300_3.4_ZX_%28Colombia%29_front_view_04.png/330px-2021_Toyota_Land_Cruiser_300_3.4_ZX_%28Colombia%29_front_view_04.png",
+  "هايلوكس": W + "1/1b/2016_Toyota_HiLux_Invincible_D-4D_4WD_2.4_Front.jpg/330px-2016_Toyota_HiLux_Invincible_D-4D_4WD_2.4_Front.jpg",
+  "شاص": W + "5/5a/Toyota_Land_Cruiser_79_Simple_cabine_GRJ_facelift_2024_version_Afrique.jpg/330px-Toyota_Land_Cruiser_79_Simple_cabine_GRJ_facelift_2024_version_Afrique.jpg",
+  "برادو": W + "e/e8/2024_Toyota_Land_Cruiser_250_VX_in_Platinum_White_Pearl_Mica%2C_front_left.jpg/330px-2024_Toyota_Land_Cruiser_250_VX_in_Platinum_White_Pearl_Mica%2C_front_left.jpg",
+  "رايز": W + "d/da/2021_Daihatsu_Rocky_1.0_TC_R_ADS_Package_%28Indonesia%29_front_view_02.jpg/330px-2021_Daihatsu_Rocky_1.0_TC_R_ADS_Package_%28Indonesia%29_front_view_02.jpg",
+  "يارس": W + "8/85/2017_Toyota_Yaris_L_5-door%2C_front_right%2C_08-25-2024.jpg/330px-2017_Toyota_Yaris_L_5-door%2C_front_right%2C_08-25-2024.jpg",
+};
+const OLD_HILUX = W + "7/74/Toyota_Hilux_2.4_E_4x2_2014.jpg/330px-Toyota_Hilux_2.4_E_4x2_2014.jpg";
+const BODY: Record<string, Car["body"]> = { "هايلوكس": "pickup", "شاص": "pickup", "لاندكروزر": "suv", "برادو": "suv", "رايز": "suv" };
+
+const GALLERY: Record<string, string[]> = {"11192967728": ["/assets/listings/11192967728.webp", "/assets/listings/11192967728-2.webp", "/assets/listings/11192967728-3.webp", "/assets/listings/11192967728-4.webp", "/assets/listings/11192967728-5.webp", "/assets/listings/11192967728-6.webp", "/assets/listings/11192967728-7.webp", "/assets/listings/11192967728-8.webp", "/assets/listings/11192967728-9.webp"], "11192966812": ["/assets/listings/11192966812.webp", "/assets/listings/11192966812-2.webp"], "11192964849": ["/assets/listings/11192964849.webp", "/assets/listings/11192964849-2.webp"], "11192964672": ["/assets/listings/11192964672.webp", "/assets/listings/11192964672-2.webp"], "11192962168": ["/assets/listings/11192962168.webp", "/assets/listings/11192962168-2.webp"], "11192960542": ["/assets/listings/11192960542.webp", "/assets/listings/11192960542-2.webp"], "11192960174": ["/assets/listings/11192960174.webp", "/assets/listings/11192960174-2.webp"], "11192954441": ["/assets/listings/11192954441.webp", "/assets/listings/11192954441-2.webp"], "11192948337": ["/assets/listings/11192948337.webp", "/assets/listings/11192948337-2.webp"], "11192931289": ["/assets/listings/11192931289.webp", "/assets/listings/11192931289-2.webp"], "11192926083": ["/assets/listings/11192926083.webp", "/assets/listings/11192926083-2.webp"], "11192880837": ["/assets/listings/11192880837.webp", "/assets/listings/11192880837-2.webp"], "11192682015": ["/assets/listings/11192682015.webp", "/assets/listings/11192682015-2.webp"], "11192648481": ["/assets/listings/11192648481.webp", "/assets/listings/11192648481-2.webp"]};
+// Real ads with their own photos use them; the rest use a stand-in photo of the model.
+const car = (c: Omit<Car, "kind" | "brand" | "body">): Car => ({ kind: "car", brand: "تويوتا", body: BODY[c.model] ?? "sedan", img: GALLERY[c.id]?.[0] ?? PHOTO[c.model], imgs: GALLERY[c.id], ...c });
 const part = (p: Omit<Part, "kind" | "brand">): Part => ({ kind: "part", brand: "تويوتا", ...p });
 
 export const LISTINGS: Listing[] = [
-  car({ id: "11192911066", model: "كامري", title: "كامري 2025 ستاندر", year: 2025, km: 21000, trans: "أوتوماتيك", fuel: "بنزين", color: "#e9e9ee", colorName: "أبيض لؤلؤي", body: "sedan", city: "الرياض", price: 98000, ago: 45, seller: "ابو فيصل", desc: "كامري 2025 ستاندر، مالك أول، صيانة وكالة، بدون حوادث. الممشى 21 ألف." }),
-  car({ id: "11192913620", model: "كامري", title: "كامري 2025 LE", year: 2025, km: 36000, trans: "أوتوماتيك", fuel: "بنزين", color: "#2b2d33", colorName: "أسود", body: "sedan", city: "الدمام", price: 104000, ago: 180, seller: "معرض الخليج", desc: "كامري LE 2025، شاشة كبيرة، كاميرا خلفية، رادار." }),
-  car({ id: "11192910085", model: "كورولا", title: "للبيع كورولا 2025 مطور xli", year: 2025, km: 42000, trans: "أوتوماتيك", fuel: "بنزين", color: "#9aa1ab", colorName: "فضي", body: "sedan", city: "العارضة", price: null, ago: 32, seller: "gdmy12345", desc: "كورولا 2025 مطور XLI، ممشى 42 ألف، السيارة بحالة الوكالة." }),
-  car({ id: "11192914830", model: "رايز", title: "تويوتا رايز ستاندر 2025 باقل سعر بالمملكة", year: 2025, km: 0, trans: "أوتوماتيك", fuel: "بنزين", color: "#c23b3b", colorName: "أحمر", body: "suv", city: "بريدة", price: 74900, ago: 8640, seller: "شركة أوتوجيت للسيارات", desc: "رايز 2025 جديدة صفر كيلو، ضمان الوكالة." }),
-  car({ id: "11192912201", model: "فورتشنر", title: "فورتشنر ديزل موديل 2025 مستعملة حبه فقط", year: 2025, km: 38000, trans: "أوتوماتيك", fuel: "ديزل", color: "#f1f1f3", colorName: "أبيض", body: "suv", city: "الرياض", price: 116000, ago: 30240, seller: "ابوطارق للسيارات تويوتا", desc: "فورتشنر ديزل 2025، حبة فقط، مستعملة استعمال خفيف." }),
-  car({ id: "11192915021", model: "شاص", title: "شاص 2025", year: 2025, km: 9000, trans: "عادي", fuel: "بنزين", color: "#ededf0", colorName: "أبيض", body: "pickup", city: "الدمام", price: 220000, ago: 31, seller: "عضو 76390747", desc: "شاص 2025 غمارة، ممشى 9 آلاف، نظيف جداً." }),
-  car({ id: "11192915060", model: "فورتشنر", title: "فورتشنر 4سلندر دبل 2026", year: 2026, km: 0, trans: "أوتوماتيك", fuel: "بنزين", color: "#f1f1f3", colorName: "أبيض", body: "suv", city: "خميس مشيط", price: null, ago: 31, seller: "ابو حمد", desc: "فورتشنر 2026 أربع سلندر دبل، جديد صفر." }),
-  car({ id: "11192914102", model: "هايلكس", title: "هايلكس 2025 غمارتين", year: 2025, km: 18000, trans: "عادي", fuel: "ديزل", color: "#d8d2c4", colorName: "بيج", body: "pickup", city: "أبها", price: 112000, ago: 600, seller: "سعد الشهري", desc: "هايلكس غمارتين 2025 ديزل، ممشى 18 ألف." }),
-  car({ id: "11192914415", model: "لاندكروزر", title: "لاندكروزر 2025 GXR", year: 2025, km: 64000, trans: "أوتوماتيك", fuel: "بنزين", color: "#3a3c44", colorName: "رمادي", body: "suv", city: "الرياض", price: 285000, ago: 900, seller: "معرض الصفوة", desc: "لاندكروزر GXR 2025، ممشى 64 ألف، سرفس كامل." }),
-  car({ id: "11192914990", model: "كامري", title: "كامري هايبرد 2025 فل كامل", year: 2025, km: null, trans: "أوتوماتيك", fuel: "هايبرد", color: "#5d7fa8", colorName: "أزرق", body: "sedan", city: "الخبر", price: null, ago: 75, seller: "ماجد علي", desc: "كامري لومير هايبرد فل كامل اللون الجديد. للتواصل خاص." }),
-  car({ id: "11192911890", model: "لاندكروزر", title: "لاندكروزر 2026 وارد سعودي L4", year: 2026, km: 17000, trans: "أوتوماتيك", fuel: "بنزين", color: "#ececf0", colorName: "أبيض", body: "suv", city: "الرياض", price: 329000, ago: 240, seller: "ابوخالد", desc: "لاندكروزر 2026 وارد سعودي، ممشى 17 ألف." }),
-  car({ id: "11192912311", model: "اوربان كروزر", title: "اوربان كروزر 2026 نص فل", year: 2026, km: 3000, trans: "أوتوماتيك", fuel: "بنزين", color: "#406a52", colorName: "أخضر", body: "suv", city: "جدة", price: 88000, ago: 2880, seller: "فهد ع", desc: "اوربان كروزر نص فل، ممشى 3 آلاف." }),
-  car({ id: "11192910311", model: "كامري", title: "كامري 2022 ستاندر شبه وكالة", year: 2022, km: 31000, trans: "أوتوماتيك", fuel: "بنزين", color: "#e6e6ea", colorName: "أبيض", body: "sedan", city: "الطائف", price: 72000, ago: 1600, seller: "عبدالله م", desc: "كامري 2022 ستاندر، ممشى 31 ألف." }),
-  car({ id: "11192910712", model: "برادو", title: "برادو 2023 VX سعودي", year: 2023, km: 12000, trans: "أوتوماتيك", fuel: "بنزين", color: "#f3f3f5", colorName: "أبيض لؤلؤي", body: "suv", city: "الرياض", price: 205000, ago: 4300, seller: "عبداللطيف جميل", desc: "برادو VX 2023 سعودي، 6 سلندر." }),
-  car({ id: "11192909877", model: "كورولا", title: "كورولا 2020 مخزن", year: 2020, km: 95000, trans: "أوتوماتيك", fuel: "بنزين", color: "#7d8590", colorName: "رمادي", body: "sedan", city: "مكة", price: 52000, ago: 5000, seller: "نواف", desc: "كورولا 2020 ممشى 95 ألف." }),
-  car({ id: "11192915388", model: "هايلكس", title: "هايلكس 2014 للبيع ممشى 560 الف مغير كبوت فقط", year: 2014, km: 560000, trans: "عادي", fuel: "بنزين", color: "#f1f1f3", colorName: "أبيض", body: "pickup", city: "بيشة", price: null, ago: 6, seller: "علي زايد الشهري", desc: "تويوتا هايلوكس GLX 2014 مستخدم، قير عادي، بنزين. الممشى: 560 ألف كيلو أو أكثر. مغير كبوت فقط." }),
-  car({ id: "11192914407", model: "هايلكس", title: "هايلكس 84", year: 1984, km: null, trans: "عادي", fuel: "بنزين", color: "#c8a46a", colorName: "ذهبي", body: "pickup", city: "رجال ألمع", price: null, ago: 700, seller: "ابو مشعل", desc: "هايلكس موديل 1984 قير عادي، الموتر عزمه قوي ومجدد." }),
-  car({ id: "11192908112", model: "سيكويا", title: "سيكويا 2013", year: 2013, km: 265000, trans: "أوتوماتيك", fuel: "بنزين", color: "#2f3b4c", colorName: "كحلي", body: "suv", city: "تبوك", price: 61000, ago: 8000, seller: "3bdkrem", desc: "سيكويا 2013 فل كامل." }),
-  car({ id: "11192907766", model: "افالون", title: "افالون 2019 ليمتد", year: 2019, km: 140000, trans: "أوتوماتيك", fuel: "بنزين", color: "#5b1f24", colorName: "عنابي", body: "sedan", city: "الرياض", price: 69000, ago: 9100, seller: "تركي", desc: "افالون ليمتد 2019." }),
+  // ── model 2025 ──
+  car({ id: "11192964849", model: "شاص", title: "شاص 2025", year: 2025, km: 44000, trans: null, fuel: "ديزل", city: "الدمام", price: 220000, ago: 53, seller: "عضو 7 6390747",
+    desc: `تويوتا شاص 2025 مستعملة للبيع
+قير اوتماتيك
+ديزل
+الممشى: 44 ألف كيلو
+دبل
 
-  part({ id: "11192914380", title: "دعاسات كورولا قوالب 5D تويوتا الحق العرض خصم 100ريال", fits: [2020, 2025], city: "مكة", price: 200, ago: 40320, seller: "دكان زد" }),
-  part({ id: "11192914507", title: "طاسة هايلكس حبة وحدة", fits: [2014, 2025], city: "الدمام", price: null, ago: 200, seller: "ابو عمر" }),
-  part({ id: "11192911760", title: "صدام لاندكروزر GXR 2014 وكالة", fits: [2014, 2015], city: "جازان", price: null, ago: 3300, seller: "قطع جازان" }),
-  part({ id: "11192911561", title: "اسطب كامري 2011", fits: [2010, 2011], city: "الرياض", price: 180, ago: 2400, seller: "تشليح الرياض" }),
-  part({ id: "11192913712", title: "مكينة كورولا 2025 وكالة", fits: [2025, 2025], city: "الرياض", price: 9500, ago: 600, seller: "مكائن الوسطى" }),
-  part({ id: "11192912955", title: "منظم اضافي في التكاية للفورشنر 2006 الى 2025", fits: [2006, 2025], city: "الرياض", price: null, ago: 40320, seller: "ابوعبدالكريم 8" }),
-  part({ id: "11192915101", title: "كتالوج كامري 2007 - 2011", fits: [2007, 2011], city: "الرياض", price: null, ago: 40, seller: "al00000000" }),
+شاص 2025
+ماشي 44 الف
+بدي وكاله
+قزازه قزاز الوكاله
+محركات قير جسور شرط
+قير اوتماتيك 6 سرعات
+ديزل
+عليه مساعدات كنق
+فل كامل ( ونش دفلوك امامي و خلفي )
+الملاحظات :
+القزاز الامامي فيها كسر بسيط ( قزاز الوكاله)
+كان عليه جنوط برايد و انزال
+الموتر شرط خالي من الحوادث
+( " التواصل واتس " )` }),
+  car({ id: "11192964672", model: "كورولا", title: "للبيع كورولا 2025 مطور xli", year: 2025, km: 27000, trans: "أوتوماتيك", fuel: "بنزين", city: "العارضة", price: null, ago: 55, seller: "gdmy12345",
+    desc: `المكينة 2000
+المالك الأول
+يوجد دقه خفيفه على الرفرف الخلفي يسار كما في الصورة وخدش  في الصدام الخلفي
+التواصل عن طريق موقع حراج` }),
+  car({ id: "11192962168", model: "كامري", title: "كامري 2025 ماشي 20 الف LE فتحه", year: 2025, km: 21000, trans: "أوتوماتيك", fuel: "بنزين", city: "المدينة", price: 112500, ago: 60, seller: "ابوفيصل9990",
+    desc: `للبيع كامري 2025 عبداللطيف جميل
+ماشي 21 الف
+البدي وكاله
+القير والمكينه وكاله
+موتر طيب مشروط ع الفحص
+السعر 112500` }),
+  car({ id: "11192966812", model: "كامري", title: "كامري هايبرد 2025 مستعمله", year: 2025, km: 74000, trans: "أوتوماتيك", fuel: "هايبرد", city: "مكه", price: 95000, ago: 29, seller: "m-malkiii",
+    desc: `حالة السيارة
+السيارة بحالة الوكالة، نظيفة جداً من الداخل والخارج
+البدي ( صدام خلفي تم تغيره ورش لكر لتوحيد اللون )
+( في حكة في الجنب لم يتم التعديل لكي تبان للمشتري )
+كسر بسيط في الاسطب الايسر
+صيانات دورية منتظمة في مراكز معتمده ويوجد فواتير الكترونية وورقية
+المكيف ثلج، والسيارة ما تشتكي من شي
+استخدام شخصي حشمة، مو حق كرف
+اول مستخدم
+الاضافات :
+تظليل عازل ضمان 10 سنوات` }),
+  car({ id: "11192960542", model: "كورولا", title: "كورلا او كورولا رصاصي 2025 ماشي 30 الف", year: 2025, km: 30000, trans: "أوتوماتيك", fuel: "بنزين", city: "الرس", price: 55000, ago: 120, seller: "aa1234bba",
+    desc: `كورلا 2025
+ملاحظات البدي
+باب ورفرف خلفي يسار مغير
+وتعديل رفرف يمين ورا
+وتعديل رفرف يمين امامي
+شاص إرباقات سليم` }),
+  car({ id: "11192931289", model: "لاندكروزر", title: "تويوتا لاندكروزر GXR-L2 ديزل 2025 ممشى 37 الف", year: 2025, km: 37000, trans: "أوتوماتيك", fuel: "ديزل", city: "الرياض", price: 245000, ago: 540, seller: "قمة نجد للسيارات القادسية",
+    desc: `للبيع لدى معرض قمة نجد للسيارات
+
+◄►◄►◄►◄►◄►
+
+معرض قمة نجد للسيارات
+الرياض - معارض حي القادسية
+
+◄►◄►◄►◄►◄►
+
+أوقات الدوام:
+
+من السبت إلى الخميس:
+الفترة الصباحية: 8:45 صباحًا إلى 12:30 ظهرًا
+الفترة المسائية: 3:30 مساءً إلى 9:00 مساءً
+
+الجمعة:
+الفترة المسائية: 3:30 مساءً إلى 9:00 مساءً
+
+حياكم الله في معرض قمة نجد للسيارات.` }),
+  car({ id: "11192948337", model: "هايلوكس", title: "تويوتا هايلوكس 2025 GL2 ديزل قير عايدي سعودي عداد 65 الف", year: 2025, km: 65000, trans: "عادي", fuel: "ديزل", city: "بريدة", price: 112500, ago: 240, seller: "معرض الحنيني للسيارات",
+    desc: `معرض الحنــيــنــي للسيارات
+القصيم - بريده - معارض السيارات
+▂▂▂▂▂▂▂▂▂▂▂▂▂▂
+نوع السيارة: تويوتا هايلوكس
+الموديل : 2025
+الفئة: GL2
+العداد: 65000
+نوع الوقود ؛ ديزل
+وارد ؛ عبداللطيف جميل
+_____________________
+* محرك 2400 سي سي ديزل
+* قير عادي 6 سرعات
+* دفع خلفي-دبل خفيف-دبل ثقيل
+* جنوط حديد
+* اشارات بالمرايا
+* مقاعد قماش
+* زجاج كهربائي
+* تحكم بالدركسون
+* شاشة
+* فرامل ABS
+* مانع انزلاق
+* حساس كفرات
+* عدد 5 احزمة
+_____________________
+( في حاله عدم الرد يرجئ   )` }),
+  car({ id: "11192926083", model: "شاص", title: "تويوتا شاص 2025 ديزل فل كامل اوتماتيك سعودي عداد 11 الف", year: 2025, km: 11000, trans: "أوتوماتيك", fuel: "ديزل", city: "بريدة", price: 210000, ago: 660, seller: "معرض الحنيني للسيارات",
+    desc: `معرض الحنــيــنــي للسيارات
+القصيم - بريده - معارض السيارات
+▂▂▂▂▂▂▂▂▂▂▂▂▂▂
+➖➖➖ بيانات السيارة ➖➖➖
+الشركة المصنعة : تويوتا شاص
+**نوع السيارة : فل كامل اوتماتيك ديزل
+**موديل السيارة : 2025
+**الألوان المتوفرة : بيج
+**وكيل السيارة : سعودي عبداللطيف جميل
+عداد : 11000
+➖➖➖➖➖➖➖
+* سعة المحرك: 2.8 لتر، 4 أسطوانات ديزل تيربو.
+القوة الحصانية: 201 حصان.
+عزم الدوران: 500 نيوتن متر.
+ناقل الحركة: أوتوماتيكي بـ 6 سرعات.
+نظام الدفع: رباعي (دبل خفيف، دبل ثقيل، وقفل دفرنس خلفي ديفلوك).
+سعة خزان الوقود: 180 لتراً.
+استهلاك الوقود: 11.7 كم/لتر (ديزل يورو 5)
+—————————————-
+السوم ( 210000)` }),
+  car({ id: "11192880837", model: "كورولا", title: "كورلا 2025 ستاندر ماشيه 91 الف تقريبا سبب البيع فلوس ل زواج", year: 2025, km: 91000, trans: "أوتوماتيك", fuel: "بنزين", city: "الهفوف", price: null, ago: 660, seller: "karissa",
+    desc: `السياره يفحصها الي يبغا يشتريها أمورها طيبه وببعتها ل أمور زواج يوجد بعض الملاحظات توضح ل صامل في مقطع فديوا واتس الحد للي طالبه 58 الله يبارك لمن يشتريها و لولا الزواج مابعت و الشريطي لا يتفلسف.` }),
+  car({ id: "11192682015", model: "برادو", title: "تويوتا برادو TXL2 بنزين موديل 2025 عداد 11 الف", year: 2025, km: 11000, trans: null, fuel: "بنزين", city: "جده", price: null, ago: 5760, seller: "معرض العز للسيارات",
+    desc: `معرض العز للسيارات يقدم لكم هذا العرض
+_______________________________________
+* النوع / برادو TXL2 بنزين
+* الموديل / 2025
+* العداد / 11 الف كم
+* حاله البودي / وكاله
+* حاله المكانيكا / شرط قير مكينه وعضلات
+_______________________________________
+(( المواصفات ))
+4سلندر تيربو بنزين . اوتوماتيك . فتحة سقف . دبل . مقاعد جلد . شنطة كهرباء . حساسات اماميه وخلفيه . دخول ذكي . تشغيل بصمة . شاشة معلومات ابل كار بلاي . كاميرا . هوك خلفي . ثلاجه . تبريد وتسخين المقاعد الامامية . مكيف خلفي منفصل . تحكم بالدركسون . تحديد مسار . نقاط عمياء . ريموت . جنوط . حنايا عفش .
+_______________________________________
+شحن لجميع مناطق المملكه بخصم خاص لدى مجموعة البسامي
+_______________________________________
+العنوان / جدة معرض العز للسيارات حي الجوهرة معارض السيارات موقع المعرض في قوقول ماب` }),
+  car({ id: "11192954441", model: "كامري", title: "كامري 2025", year: 2025, km: 35000, trans: null, fuel: null, city: "خميس مشيط", price: 85000, ago: 180, seller: "سعد أ القحطاني",
+    desc: `كامري 2025. ستاندر. ممشى 35 الف
+محركات وكاله. البدي رفرف قدام يمين فيه رش وشمعه جتها دقّه وصدام تغيّر والباقي شد بلدّ. ضمان الوكاله باقي موجود. سوم 85 ونطلب الله زود
+ 85,000 ريال` }),
+  car({ id: "11192648481", model: "شاص", title: "شاص غمارتين بنزين وارد البريمي 2026 فل كامل فئة ال 40 سنه", year: 2025, km: 26000, trans: "أوتوماتيك", fuel: "بنزين", city: "جده", price: 260000, ago: 5760, seller: "jeel bajeel",
+    desc: `ممشى : 26,000
+
+6 سلندر
+
+وارد البريمي / مجمرك وداخل ضمان عبداللطيف جميل
+
+السياره فيها ( غليون + ونش سحب في الامام )
+
+داخليه : جلد وشمواه
+
+حاله البدي و المحركات : خاليه من كل شي وسليمه
+
+السياره جاهزه ومعدله بجميع الاحتياجات
+
+الاضافات
+• مساعدات ims دوبينسون
+• كشافات اماميه خلف الشبك
+• عوازل داخل السياره بلكامل لعزل الصوت و الحراره
+• فل ppf
+• عوازل وتظليل خفيف للقزاز
+• درع للقزاز الامامي
+• سماعات 2 للابواب الخلفيه
+• حمايه للحوض لغرض التحميل` }),
+  car({ id: "11192960174", model: "كامري", title: "كامري 2025 LE", year: 2025, km: 48000, trans: "أوتوماتيك", fuel: "هايبرد", city: "الدمام", price: null, ago: 120, seller: "iphone sa",
+    desc: `للبيع تويوتا كامري 2025 LE هايبرد
+• الموديل: 2025
+• الفئة: LE Hybrid سقف بانوراما
+• اللون: تيتانيوم
+• الممشى: 48,000 كم
+• المالك: الثاني
+• البدي: وكالة
+• الصيانة: منتظمة لدى الوكالة
+• التظليل: 3M
+• الحماية: حماية كاملة للواجهة الأمامية
+حالة السيارة: نظيفة، وتوجد ملاحظات بسيطة موضحة بالصور المرفقة.
+السيارة على الشرط، والفحص متاح للمشتري.` }),
+  car({ id: "11192967728", model: "كامري", title: "كامري 2025 LE الدفعة الأخيرة", year: 2025, km: 19000, trans: "أوتوماتيك", fuel: "بنزين", city: "جيزان", price: null, ago: 20, seller: "أبو احمد 708",
+    desc: `تويوتا كامري 2025
+بنزين
+
+الممشى: 19
+
+
+كامري 2025 للبيع بحالة الوكالة عليها حماية مقدمه كاملة منجدة من داخل كامل ppf داخلي السيارة جديدة الزيت مغير مرتين فقط السيارة نظيفة شرط لا يتواصل إلا الصامل والجاد الرجاء لا يتواصل إلا الصامل فقط
+
+البيع كاش لا اقبل البدل
+الرجاء قراءة الإعلان كامل` }),
+
+  // ── model 2026 (Haraj's structured field says 2026 new, though the title says 2025) ──
+  car({ id: "11171867713", model: "رايز", title: "تويوتا رايز ستاندر 2025 باقل سعر بالمملكة", year: 2026, km: 0, trans: "أوتوماتيك", fuel: "بنزين", city: "بريدة", price: null, ago: 10080, seller: "شركة أوتوجيت للسيارات",
+    desc: `شركة أوتوجيت للسيارات
+__________________
+الموقع: القصيم - بريدة - حي المنتزة
+يوجد شحن لجميع مناطق المملكة
+__________________
+للمتابعة وليصلك كل جديد لدينا قم بالضغط على أسم العضوية الخاص بنا ثم الضغط على متابعة
+__________________________________
+
+⬙ ابرز المواصفات ⬙
+
+* المحرك: 1.2 لتر، 3-اسطوانات
+* القوة القصوى: 87 حصان
+* العزم الأقصى 113 ن.م / 4500 د.د
+* ناقل حركة تتابعي متغير (CVT)
+* دفع أمامي (FWD)
+* سعة خزان الوقود: 36 لتر
+* كفاءة استهلاك الوقود: 21.1 كم/لتر
+* الأبعاد طول - عرض - ارتفاع (مم): 4030 - 1710 - 1635
+* 5 ركاب (شاملة السائق)
+المزايا الخارجية
+* مقاس الإطارات: 205/65R16
+* انوار أمامية هالوجين
+* كشافات ضباب أمامية هالوجين
+* انوار خلفية (LED)
+* الدخول بدون مفتاح "ريموت كونترول"
+* مرايات جانبية كهربائية مع اشارات انعطاف
+* جناح خلفي
+المزايا الداخلية
+* مقاعد قماش
+* تحكم بارتفاع مقعد السائق
+* مكيف هواء بتحكم يدوي
+* المقود و ذراع ناقل الحركة و مسند اليد من اليوريثين
+* ازرار تحكم على المقود
+* شاشة معلومات متعددة
+
+_____________________
+
+◈ معتمدون لدى جميع البنوك وشركات التمويل ◈
+
+أفضل العروض بالنقد والتأجير المنتهي بالتمليك وبأقل هامش ربح بالتعاون مع:
+( مصرف الراجحي - بنك الاهلي - بنك الرياض - بنك الفرنسي - بنك البلاد - شركة عبد اللطيف جميل للتمويل - شركة تمويل الاولى - شركة رايه - بنك الانماء - شركة التيسير - شركة إمكان للتمويل )
+****************************************
+ كذلك توجد خصومات على العازل الحراري والحماية` }),
+
+  // ── model 2024 and older ──
+  // Titled "Fortuner 2025", but the seller's structured specs say Hilux GLX 2024, 68,000 km.
+  car({ id: "11185111407", model: "هايلوكس", title: "فورشنر ديزل موديل 2025 مستعملة حبه فقط", year: 2024, km: 68000, trans: "عادي", fuel: "بنزين", city: "الرياض", price: 116000, ago: 30240, seller: "ابوطارق للسيارات تويوتا",
+    desc: `ــــــــــــــــــــــــــــــــــــــــــ
+تويوتا: فورشنر ديزلGX2
+ــــــــــــــــــــــــــــــــــــــــــ
+الموديل: 2025
+ــــــــــــــــــــــــــــــــــــــــــ
+اللون: ... ابيض
+ــــــــــــــــــــــــــــــــــــــــــ
+العداد: 68,389
+ــــــــــــــــــــــــــــــــــــــــــ
+السعر : 116,000
+السعر متغير حسب تأريخ الإعلان
+ــــــــــــــــــــــــــــــــــــــــــ
+المواصفات:
+ــــــــــــــــــــــــــــــــــــــــــ
+ابو طارق` }),
+  car({ id: "11192968584", model: "لاندكروزر", title: "لاندكروزر GXR4 موديل 2024 للبيع سعودي وارد عبداللطيف جميل", year: 2024, km: 38000, trans: "أوتوماتيك", fuel: "بنزين", city: "الرياض", price: 275000, ago: 8, seller: "mohammed abu faris",
+    desc: `***ماشاءالله تبارك الله ***
+لاندكروزر GXR4 موديل 2024 سعودي عبداللطيف جميل
+
+* المالك الأول
+* ممشى 38,000 كم
+* سعودي عبداللطيف جميل
+* الضمان ساري
+* جميع الصيانات في وكالة عبداللطيف جميل
+* شرط القير والمحرك والشاص والبودي
+* السيارة نظيفة جداً ولا تحتاج أي مصروف
+* الاستخدام شخصي ومنوة المستخدم
+* الفحص في أي مركز معتمد على حساب المشتري
+
+الموقع: الرياض
+
+للجادين فقط البيع على السوم، التواصل اتصال فقط.
+الرجاء عدم إرسال رسائل أو سوم، وسيتم الرد على الاتصالات فقط.
+
+نسأل الله أن يبارك للبائع والمشتري.` }),
+  car({ id: "11192968586", model: "كامري", title: "كامري ستاندر 2024", year: 2024, km: 123000, trans: "أوتوماتيك", fuel: "بنزين", city: "بريدة", price: null, ago: 8, seller: "ابو راكان 00001",
+    desc: `للبيع للبيع
+كامري 2024 ستاندر
+الممشى :123 الف
+المحركات : فك راس المكينه - القير والشاصي شرط
+البدي : 5 قطع` }),
+  car({ id: "11192968739", model: "لاندكروزر", title: "جي اكس ار 8 سلندر ديزل مرهم تورنق ماشي 178 ألف وكاله", year: 2019, km: 178000, trans: "أوتوماتيك", fuel: "ديزل", city: "الدمام", price: null, ago: 6, seller: "النايفn1",
+    desc: `جي اكس ار ديزل ثمانيه سلندر اثنين تيربو ماشي178 ألف الموتر وكاله بدي متحركات شرط الفحص
+تشغيل عن بعد
+فتحه دفلك دبل ثقيل خفيف نظام المنحدرات مثبت سرعه تحكم طاره ثلاجه الطبلون ليزر شاشه اماميه الموتر جامد جدا وكفو ماشالله تبارك الله` }),
+  car({ id: "11192968923", model: "هايلوكس", title: "هايلكس 2018", year: 2018, km: 101000, trans: "عادي", fuel: "بنزين", city: "الخرج", price: 74000, ago: 4, seller: "عضو 82 5161743",
+    desc: `تويوتا هايلوكس خليجي 2018 مستعملة للبيع
+
+قير عادي
+
+بنزین
+
+الممشى : 101 ألف كيلو
+
+هايلكس 2018 ماشيه 101 بودي محركات شرط توجد تعديله
+
+كبر كف اليد بالصوره
+السوم وصل 73500` }),
+  car({ id: "11192968524", model: "يارس", title: "يارس 2017", year: 2017, km: 290000, trans: "أوتوماتيك", fuel: null, city: "النماص", price: null, ago: 9, seller: "al.i80980",
+    desc: `يارس 2017 ممشى 290 نظيفه وعلى الفحص
+فيها رشوش متفرقه من المالك السابق بدون حوادث
+استماره ساريه
+زجاج كهرب
+مكيف ثلج
+على السوم علماً انه وصل 23الف
+التواصل خاص
+التواصل خاص
+وبرقم الجوال وغير ذلك مهمل ولن ينظر له` }),
+  car({ id: "11192967610", model: "كامري", title: "للبيع كامري 2016 مخزنه ماشي 47 الف كيلو فقط", year: 2016, km: 47000, trans: "أوتوماتيك", fuel: "بنزين", city: "الرياض", price: null, ago: 20, seller: "عضو 3393",
+    desc: `تويوتا كامري GLX 2016 مستعملة للبيع
+قير اوتماتيك
+بنزين
+الممشى: 47
+
+كامري فل GLX 2016 ممشى قليل مخزن ماشي 47 الف كيلو فقط
+الموتر شرط من الصدام لصدام ومحركات شرط الموتر مافيه الا رش في باب الشنطه فقط الباقي بحاله الوكاله انا تقريبا ثاني مالك الموتر كان واقف 8 سنين عند عبداللطيف جميل في جده والموتر كفو ونظيف الرجاء لايتواصل معي حد الا الصامل كل شي موضح لكم الموتر جاته سومات واقف واخر سومه له وصلت 58 الف و500  واللي مايعرف لاسعارها لايتواصل ولا يسوم رجاء  والله يرزقنا  وياكم للتواصل   الصامل مانختلف معه باذن الله` }),
+  car({ id: "11192966832", model: "هايلوكس", title: "هايلكس 2014 للبيع ممشى 560 الف مغير كبوت فقط", year: 2014, km: 560000, trans: "عادي", fuel: "بنزين", city: "بيشة", price: null, ago: 30, seller: "علي زايد الشهري", img: OLD_HILUX,
+    desc: `للبيع هايلكس` }),
+
+  // ── parts & accessories (titles word for word; fitting years from the title or Haraj's tag) ──
+  part({ id: "11125117935", title: "دعاسات كورولا قوالب 5D تويوتا الحق العرض خصم 100ريال", fits: [2025, 2025], city: "مكه", price: 200, ago: 40320, seller: "دكان زد" }),
+  part({ id: "1156542592", title: "منظم اضافي في التكاية للفورشنر 2006 الى 2025", fits: [2006, 2025], city: "الرياض", price: null, ago: 40320, seller: "ابوعبدالكريم 8" }),
+  part({ id: "11192913712", title: "ثلاجة ماكينة كورولا 2025 وكاله نضيفه جداً جدا", fits: [2025, 2025], city: "الرياض", price: null, ago: 120, seller: "عبدالرحمن بلد" }),
+  part({ id: "11191069517", title: "شمعات رايز موديل 2025 2023", fits: [2023, 2025], city: "جده", price: null, ago: 600, seller: "مركز السهم لقطع الغيار" }),
+  part({ id: "11192431588", title: "شمعة برادو اصلي وكالة مستخدم 2024-2025-2026", fits: [2024, 2026], city: "الرياض", price: null, ago: 720, seller: "أضواء شرق السلي" }),
+  part({ id: "11192374028", title: "عداد يارس 2025 وكالة", fits: [2025, 2025], city: "الرياض", price: null, ago: 2880, seller: "asdfghj١٢٧٧" }),
+  part({ id: "11175465259", title: "كتالوج كامري 2007-2011", fits: [2007, 2011], city: "بريدة", price: null, ago: 57, seller: "عضو 8869739" }),
 ];
 
 export const MODELS: Record<string, string[]> = {
-  "تويوتا": ["كامري", "كورولا", "يارس", "رايز", "فورتشنر", "هايلكس", "شاص", "لاندكروزر", "برادو", "اوربان كروزر", "افالون", "سيكويا"],
+  "تويوتا": ["كامري", "كورولا", "يارس", "رايز", "فورتشنر", "هايلوكس", "شاص", "لاندكروزر", "برادو", "اوربان كروزر", "افالون", "سيكويا"],
   "هيونداي": ["النترا", "سوناتا", "اكسنت", "توسان"],
   "نيسان": ["صني", "التيما", "باترول", "ماكسيما"],
 };
 
-export const CITIES = ["الرياض", "جدة", "مكة", "الدمام", "الخبر", "الطائف", "القصيم", "بريدة", "أبها", "خميس مشيط", "بيشة", "تبوك", "جازان", "العارضة", "رجال ألمع"];
+export const CITIES = ["الرياض", "جده", "مكه", "المدينة", "الدمام", "الهفوف", "بريدة", "الرس", "الخرج", "خميس مشيط", "بيشة", "النماص", "جيزان", "العارضة"];
 
 const unit = (n: number, one: string, two: string, few: string, many: string) =>
   n === 1 ? one : n === 2 ? two : n <= 10 ? `${n} ${few}` : `${n} ${many}`;
