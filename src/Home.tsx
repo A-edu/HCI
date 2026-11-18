@@ -4,7 +4,7 @@ const flows = [
   { who: "Abdulaziz", site: "Saudi Post (SPL)", title: "حاسبة الأسعار البريدية", to: "/spl/calculator", ready: true },
   { who: "Mohammed", site: "Saudi Post (SPL)", title: "الشحن للمنشآت", to: "/spl/business", ready: true },
   { who: "Abdullah", site: "Haraj", title: "البحث والفلاتر", to: "/haraj/filters", ready: true },
-  { who: "Ahmed", site: "Haraj", title: "تنبيهات البحث", to: "/haraj/alerts", ready: false },
+  { who: "Ahmed", site: "Haraj", title: "تنبيهات البحث", to: "/haraj/search?ymin=2025&ymax=2025&kmax=50000", ready: true },
 ];
 
 export default function Home() {

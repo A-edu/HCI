@@ -10,6 +10,7 @@ import Contract from "./spl/business/Contract";
 import HarajFilters from "./haraj/Filters";
 import HarajListing from "./haraj/Listing";
 import HarajPost from "./haraj/Post";
+import HarajAlerts from "./haraj/Alerts";
 
 export default function App() {
   return (
@@ -25,6 +26,8 @@ export default function App() {
         <Route path="/haraj/filters" element={<HarajFilters />} />
         <Route path="/haraj/listing/:id" element={<HarajListing />} />
         <Route path="/haraj/post" element={<HarajPost />} />
+        <Route path="/haraj/search" element={<HarajFilters alerts />} />
+        <Route path="/haraj/alerts" element={<HarajAlerts />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </ShipmentProvider>

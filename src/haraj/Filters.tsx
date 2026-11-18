@@ -1,31 +1,17 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { MapPin, Navigation, CalendarDays, Gauge, Fuel, SlidersHorizontal, Video, Search, MessagesSquare, Map as MapIcon, X, ChevronDown, ChevronLeft, PackageOpen, Info, ArrowUpDown, Check } from "lucide-react";
+import { MapPin, Navigation, CalendarDays, Gauge, Fuel, SlidersHorizontal, Video, Search, MessagesSquare, Map as MapIcon, X, ChevronDown, ChevronLeft, PackageOpen, Info, ArrowUpDown, Check, Bell, BellRing } from "lucide-react";
 import { HarajLayout, Photo, chipOn } from "./HarajLayout";
 import { Img } from "./asset";
 import { IcPin, IcClock, IcRiyal, Avatar } from "./icons";
 import { LISTINGS, CITIES, fmt, timeAgo, cars as carsLabel, type Car, type Part } from "./data";
+import { readFilters, apply, critOf } from "./search";
+import { useAlerts, findByCrit } from "./alerts";
+import { SaveSearchDialog } from "./SaveSearch";
 
-const cars = LISTINGS.filter((l): l is Car => l.kind === "car");
 const parts = LISTINGS.filter((l): l is Part => l.kind === "part");
 const YEARS = Array.from({ length: 2027 - 1980 + 1 }, (_, i) => 2027 - i);
 
-type F = { ymin?: number; ymax?: number; kmax?: number; unknown: boolean; city?: string; fuel?: string; sort: string };
-
-function readFilters(q: URLSearchParams): F {
-  const n = (k: string) => (q.get(k) ? Number(q.get(k)) : undefined);
-  return { ymin: n("ymin"), ymax: n("ymax"), kmax: n("kmax"), unknown: q.get("unknown") === "1", city: q.get("city") || undefined, fuel: q.get("fuel") || undefined, sort: q.get("sort") || "new" };
-}
-
-function apply(f: F, list: Car[] = cars) {
-  return list.filter((c) =>
-    (f.ymin === undefined || c.year >= f.ymin) &&
-    (f.ymax === undefined || c.year <= f.ymax) &&
-    (f.kmax === undefined || (c.km === null ? f.unknown : c.km <= f.kmax)) &&
-    (!f.city || c.city === f.city) &&
-    (!f.fuel || c.fuel === f.fuel)
-  );
-}
 
 const sorters: Record<string, { label: string; fn: (a: Car, b: Car) => number }> = {
   new: { label: "الأحدث", fn: (a, b) => a.ago - b.ago },
@@ -126,7 +112,7 @@ export function Sidebar() {
   );
 }
 
-export default function Filters() {
+export default function Filters({ alerts = false }: { alerts?: boolean }) {
   const [q, setQ] = useSearchParams();
   const f = readFilters(q);
   const [open, setOpen] = useState<string | null>(null);
@@ -150,6 +136,7 @@ export default function Filters() {
 
   const yearLabel = f.ymin && f.ymax ? (f.ymin === f.ymax ? `${f.ymin}` : `${f.ymin} – ${f.ymax}`) : f.ymin ? `${f.ymin} وأحدث` : f.ymax ? `حتى ${f.ymax}` : null;
   const chips: { label: string; clear: Record<string, undefined> }[] = [];
+  if (f.model) chips.push({ label: f.model, clear: { model: undefined } });
   if (yearLabel) chips.push({ label: `موديل ${yearLabel}`, clear: { ymin: undefined, ymax: undefined } });
   if (f.kmax !== undefined) chips.push({ label: `الممشى حتى ${fmt(f.kmax)} كم`, clear: { kmax: undefined, unknown: undefined } });
   if (f.fuel) chips.push({ label: f.fuel, clear: { fuel: undefined } });
@@ -160,6 +147,10 @@ export default function Filters() {
   const previewK = kmDraft ? apply({ ...f, kmax: kmDraft, unknown: dk.unknown }).length : 0;
 
   const toggle = (k: string, init?: () => void) => { init?.(); setOpen(open === k ? null : k); };
+  useAlerts(); // re-render when alerts change
+  const crit = critOf(f);
+  const saved = alerts ? findByCrit(crit, "search") : undefined;
+  const [saving, setSaving] = useState(false);
 
   return (
     <HarajLayout title="سيارات تويوتا" activeBrand="تويوتا">
@@ -265,7 +256,16 @@ export default function Filters() {
               <button key={c.label} onClick={() => set(c.clear)} className={`${chipOn} h-8 flex items-center gap-1.5 text-[13px]`}>{c.label}<X size={13} /></button>
             ))}
             {chips.length > 0 && <button onClick={() => setQ(new URLSearchParams())} className="text-[13px] text-secondary/50 hover:text-secondary underline">مسح الكل</button>}
-            <div className="relative ms-auto">
+            {alerts && (saved ? (
+              <Link to="/haraj/alerts" className="ms-auto flex h-9 items-center gap-2 rounded-xl border border-text-title/40 bg-text-title/[0.10] px-3.5 text-[14px] font-medium text-text-title">
+                <BellRing size={16} />تنبيه مفعّل: {saved.name}
+              </Link>
+            ) : (
+              <button onClick={() => setSaving(true)} className="ms-auto flex h-9 items-center gap-2 rounded-xl bg-primary px-4 text-[14px] font-medium text-white hover:bg-primary-darker">
+                <Bell size={16} />نبّهني بالعروض الجديدة
+              </button>
+            ))}
+            <div className={`relative ${alerts ? "" : "ms-auto"}`}>
               <button onClick={() => toggle("sort")} className="flex h-8 items-center gap-1.5 rounded-lg px-2 text-[13px] text-secondary/60 hover:text-secondary"><ArrowUpDown size={14} />{sorters[f.sort]?.label}<ChevronDown size={13} /></button>
               <Pop open={open === "sort"} onClose={() => setOpen(null)} w={200} left>
                 {Object.entries(sorters).map(([k, s]) => (
@@ -294,10 +294,11 @@ export default function Filters() {
 
           <div className="box-border w-full relative">
             {results.length === 0 && <div className="rounded-lg bg-background-card p-12 text-center text-secondary/60">لا توجد عروض تطابق بحثك</div>}
-            {results.map((c) => <PostRow key={c.id} c={c} to={`/haraj/listing/${c.id}?back=${encodeURIComponent(q.toString())}`} />)}
+            {results.map((c) => <PostRow key={c.id} c={c} to={`/haraj/listing/${c.id}?back=${encodeURIComponent(q.toString())}${alerts ? "&from=search" : ""}`} />)}
           </div>
         </div>
       </div>
+    {saving && <SaveSearchDialog crit={crit} count={results.length} onClose={() => setSaving(false)} />}
     </HarajLayout>
   );
 }
